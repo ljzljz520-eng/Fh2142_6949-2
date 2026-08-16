@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#17201d" />
+    <title>单词拼写挑战</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand-block">
+        <span class="brand-mark" aria-hidden="true">Aa</span>
+        <div>
+          <h1>单词拼写挑战</h1>
+          <p>Spelling Challenge</p>
+        </div>
+      </div>
+      <div class="score-display" aria-label="当前总分">
+        <span>总分</span>
+        <strong id="header-score">0</strong>
+      </div>
+    </header>
+
+    <div class="app-shell">
+      <nav class="sidebar" aria-label="主菜单">
+        <button class="nav-item is-active" type="button" data-view="challenge">
+          <span aria-hidden="true">✎</span><span>开始挑战</span>
+        </button>
+        <button class="nav-item" type="button" data-view="wrong">
+          <span aria-hidden="true">↻</span><span>错词回放</span>
+        </button>
+        <button class="nav-item" type="button" data-view="history">
+          <span aria-hidden="true">▤</span><span>历史统计</span>
+        </button>
+        <button class="nav-item" type="button" data-view="review">
+          <span aria-hidden="true">✓</span><span>并发确认</span>
+        </button>
+      </nav>
+
+      <main class="workspace">
+        <section class="view is-active" id="view-challenge">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">TODAY'S ROUND</p>
+              <h2>开始挑战</h2>
+            </div>
+            <div class="segmented" aria-label="难度">
+              <button class="is-active" type="button" data-difficulty="simple">简单</button>
+              <button type="button" data-difficulty="medium">中等</button>
+            </div>
+          </div>
+
+          <div class="challenge-stage">
+            <div class="round-meta">
+              <span id="round-progress">第 1 / 4 题</span>
+              <div class="mode-switch" aria-label="提示模式">
+                <button class="is-active" type="button" data-mode="chinese">中文提示</button>
+                <button type="button" data-mode="scrambled">乱序字母</button>
+              </div>
+            </div>
+            <div class="prompt" id="prompt">加载中</div>
+            <form id="answer-form" class="answer-form">
+              <label for="answer-input">英文单词</label>
+              <div class="answer-row">
+                <input id="answer-input" name="answer" autocomplete="off" spellcheck="false" required />
+                <button class="primary-button" type="submit">提交答案</button>
+              </div>
+            </form>
+            <div class="result-line" id="result-line" role="status" aria-live="polite"></div>
+            <button class="next-button" id="next-button" type="button">下一题 <span aria-hidden="true">→</span></button>
+          </div>
+        </section>
+
+        <section class="view" id="view-wrong">
+          <div class="section-heading">
+            <div><p class="eyebrow">REPLAY</p><h2>错词回放</h2></div>
+            <button class="quiet-button" id="refresh-wrong" type="button">刷新</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>中文</th><th>你的答案</th><th>正确拼写</th><th>用时</th></tr></thead>
+              <tbody id="wrong-body"></tbody>
+            </table>
+            <p class="empty-state" id="wrong-empty">暂无错词</p>
+          </div>
+        </section>
+
+        <section class="view" id="view-history">
+          <div class="section-heading"><div><p class="eyebrow">PERFORMANCE</p><h2>历史统计</h2></div></div>
+          <div class="stats-grid">
+            <div class="metric"><span>答题数</span><strong id="stat-attempts">0</strong></div>
+            <div class="metric"><span>正确率</span><strong id="stat-rate">0%</strong></div>
+            <div class="metric"><span>累计用时</span><strong id="stat-time">0.0s</strong></div>
+            <div class="metric accent"><span>累计得分</span><strong id="stat-score">0</strong></div>
+          </div>
+          <div class="table-wrap history-table">
+            <table>
+              <thead><tr><th>单词</th><th>难度</th><th>结果</th><th>得分</th><th>用时</th></tr></thead>
+              <tbody id="history-body"></tbody>
+            </table>
+            <p class="empty-state" id="history-empty">暂无答题记录</p>
+          </div>
+        </section>
+
+        <section class="view" id="view-review">
+          <div class="section-heading"><div><p class="eyebrow">TEAM REVIEW</p><h2>并发确认</h2></div></div>
+          <div class="review-grid">
+            <form class="operator-panel" id="operator-a-form">
+              <span class="operator-index">01</span>
+              <label>操作员<input name="operator" value="操作员甲" required /></label>
+              <label>确认内容<input name="content" value="已确认英文拼写" required /></label>
+            </form>
+            <form class="operator-panel" id="operator-b-form">
+              <span class="operator-index">02</span>
+              <label>操作员<input name="operator" value="操作员乙" required /></label>
+              <label>确认内容<input name="content" value="已确认中文释义" required /></label>
+            </form>
+          </div>
+          <div class="review-actions">
+            <button class="primary-button" id="submit-concurrent" type="button">同时提交</button>
+            <span id="review-status" role="status" aria-live="polite"></span>
+          </div>
+          <div class="summary-band">
+            <div><span class="summary-label">记录</span><strong>daily-review</strong></div>
+            <div class="confirmation-list" id="confirmation-list"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/src/app.js"></script>
+  </body>
+</html>
