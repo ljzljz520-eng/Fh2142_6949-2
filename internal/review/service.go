@@ -57,6 +57,11 @@ func (s *Service) Confirm(recordID, operator, content string) (Summary, error) {
 		return Summary{}, ErrInvalidConfirmation
 	}
 
+	// Load phase: read the current record under a read lock. The after-load sync
+	// point below deliberately lets another operator confirm the same record
+	// between this load and the store, so the loaded snapshot may be stale by the
+	// time we persist. The store must therefore merge this operator's change into
+	// the latest state instead of overwriting the record with the stale snapshot.
 	s.mu.RLock()
 	current, ok := s.records[recordID]
 	next := record{ID: recordID, Confirmations: make(map[string]string)}
@@ -68,8 +73,22 @@ func (s *Service) Confirm(recordID, operator, content string) (Summary, error) {
 	s.mu.RUnlock()
 
 	s.notify(UpdateEvent{RecordID: recordID, Operator: operator, Stage: StageAfterLoad})
+
 	next.Confirmations[operator] = content
+
+	// Store phase: re-read the latest state under a write lock and fold in any
+	// confirmations another operator added between our load and store. Only our
+	// own entry keeps the value we just confirmed; every other entry is taken
+	// from the latest state, so concurrent confirmations are never dropped.
 	s.mu.Lock()
+	if latest, latestOK := s.records[recordID]; latestOK {
+		for name, value := range latest.Confirmations {
+			if name == operator {
+				continue
+			}
+			next.Confirmations[name] = value
+		}
+	}
 	s.records[recordID] = next
 	s.mu.Unlock()
 	s.notify(UpdateEvent{RecordID: recordID, Operator: operator, Stage: StageAfterStore})
