@@ -68,8 +68,13 @@ func (s *Service) Confirm(recordID, operator, content string) (Summary, error) {
 	s.mu.RUnlock()
 
 	s.notify(UpdateEvent{RecordID: recordID, Operator: operator, Stage: StageAfterLoad})
-	next.Confirmations[operator] = content
 	s.mu.Lock()
+	if latest, exists := s.records[recordID]; exists {
+		for name, value := range latest.Confirmations {
+			next.Confirmations[name] = value
+		}
+	}
+	next.Confirmations[operator] = content
 	s.records[recordID] = next
 	s.mu.Unlock()
 	s.notify(UpdateEvent{RecordID: recordID, Operator: operator, Stage: StageAfterStore})
